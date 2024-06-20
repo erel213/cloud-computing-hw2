@@ -1,10 +1,12 @@
-package postgres_user_repository
+package repository
 
 import (
 	"cmd/main.go/internal/appError"
 	"cmd/main.go/internal/domain/entity"
 	"cmd/main.go/internal/domain/repository"
 	"database/sql"
+
+	"github.com/google/uuid"
 )
 
 type PostgresUserRepository struct {
@@ -29,4 +31,25 @@ func (p *PostgresUserRepository) CreateUser(user *entity.User) (entity.User, app
 	}
 
 	return *user, nil
+}
+
+func (p *PostgresUserRepository) CheckIfUserExists(userId uuid.UUID) (bool, appError.AppError) {
+	query := `
+	SELECT EXISTS (
+		SELECT 1
+		FROM User
+		WHERE user_id = $1
+	)`
+
+	var exists bool
+	err := p.db.QueryRow(query, userId).Scan(&exists)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, appError.InternalError{Err: err}
+	}
+
+	return exists, nil
 }
