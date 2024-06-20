@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"cmd/main.go/internal/appError"
-	"cmd/main.go/internal/domain/entity"
+	"whatsapp-like/internal/appError"
+	"whatsapp-like/internal/domain/entity"
 
 	"github.com/google/uuid"
 )

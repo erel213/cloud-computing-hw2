@@ -1,3 +1,3 @@
-CREATE TABLE IF NOT EXISTS User (
-    user_id UUID PRIMARY KEY,
-)
+CREATE TABLE IF NOT EXISTS users (
+    user_id UUID PRIMARY KEY
+);
