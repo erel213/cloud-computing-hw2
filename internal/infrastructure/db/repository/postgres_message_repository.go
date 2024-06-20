@@ -1,10 +1,10 @@
 package postgresRepository
 
 import (
-	"cmd/main.go/internal/appError"
-	"cmd/main.go/internal/domain/entity"
-	"cmd/main.go/internal/domain/repository"
 	"database/sql"
+	"whatsapp-like/internal/appError"
+	"whatsapp-like/internal/domain/entity"
+	"whatsapp-like/internal/domain/repository"
 )
 
 type PostgresMessageRepository struct {
@@ -17,11 +17,11 @@ func NewPostgresMessageRepository(db *sql.DB) repository.MessageRepository {
 
 func (repo *PostgresMessageRepository) CreateMessage(message *entity.Message) appError.AppError {
 	query := `
-	INSERT into Message (
+	INSERT into messages (
 		message_id,
 		from_user,
-		to,
-		message_body,
+		send_to,
+		message_content,
 		to_group
 	)
 	VALUES ($1, $2, $3, $4, $5)

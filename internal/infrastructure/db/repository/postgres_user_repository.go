@@ -1,10 +1,10 @@
 package postgresRepository
 
 import (
-	"cmd/main.go/internal/appError"
-	"cmd/main.go/internal/domain/entity"
-	"cmd/main.go/internal/domain/repository"
 	"database/sql"
+	"whatsapp-like/internal/appError"
+	"whatsapp-like/internal/domain/entity"
+	"whatsapp-like/internal/domain/repository"
 
 	"github.com/google/uuid"
 )
@@ -19,10 +19,9 @@ func NewPostgresUserRepository(db *sql.DB) repository.UserRepository {
 
 func (p *PostgresUserRepository) CreateUser(user *entity.User) (entity.User, appError.AppError) {
 	query := `
-	INSERT into User (
-		user_id,
+	INSERT into users (user_id)
 	VALUES ($1)
-	)`
+	`
 
 	_, err := p.db.Exec(query, user.UserId)
 
@@ -37,7 +36,7 @@ func (p *PostgresUserRepository) CheckIfUserExists(userId uuid.UUID) (bool, appE
 	query := `
 	SELECT EXISTS (
 		SELECT 1
-		FROM User
+		FROM users
 		WHERE user_id = $1
 	)`
 

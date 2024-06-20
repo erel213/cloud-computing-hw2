@@ -1,8 +1,8 @@
 package router
 
 import (
-	"cmd/main.go/contracts"
-	"cmd/main.go/internal/application"
+	"whatsapp-like/contracts"
+	"whatsapp-like/internal/application"
 
 	"github.com/gofiber/fiber/v2"
 )

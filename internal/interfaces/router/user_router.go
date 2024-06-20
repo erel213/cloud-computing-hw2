@@ -1,7 +1,7 @@
 package router
 
 import (
-	"cmd/main.go/internal/application"
+	"whatsapp-like/internal/application"
 
 	"github.com/gofiber/fiber/v2"
 )

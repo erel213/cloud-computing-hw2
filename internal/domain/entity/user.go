@@ -1,8 +1,8 @@
 package entity
 
 import (
-	"cmd/main.go/internal/appError"
 	"errors"
+	"whatsapp-like/internal/appError"
 
 	"github.com/google/uuid"
 )

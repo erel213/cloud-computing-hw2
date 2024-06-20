@@ -1,10 +1,10 @@
 package application
 
 import (
-	"cmd/main.go/contracts"
-	"cmd/main.go/internal/appError"
-	"cmd/main.go/internal/domain/entity"
-	"cmd/main.go/internal/domain/repository"
+	"whatsapp-like/contracts"
+	"whatsapp-like/internal/appError"
+	"whatsapp-like/internal/domain/entity"
+	"whatsapp-like/internal/domain/repository"
 )
 
 type UserService struct {
