@@ -1,14 +1,16 @@
 package main
 
 import (
-	"cmd/main.go/internal/application"
-	postgresRepository "cmd/main.go/internal/infrastructure/db/repository"
-	"cmd/main.go/internal/interfaces/router"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
+	"whatsapp-like/internal/application"
+	postgresRepository "whatsapp-like/internal/infrastructure/db/repository"
+	"whatsapp-like/internal/interfaces/router"
 
 	"github.com/gofiber/fiber/v2"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -36,4 +38,12 @@ func main() {
 
 	app.Post("/user", userRouter.CreateUser)
 	app.Post("/message", messageRouter.SendMessage)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Server listening on port %s", port)
+	log.Fatal(app.Listen(fmt.Sprintf(":%s", port)))
 }
