@@ -1,4 +1,4 @@
-package repository
+package postgresRepository
 
 import (
 	"cmd/main.go/internal/appError"
