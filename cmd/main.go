@@ -42,6 +42,8 @@ func main() {
 	app.Post("/user", userRouter.CreateUser)
 	app.Post("/message", messageRouter.SendMessage)
 	app.Post("/group", groupRouter.CreateGroup)
+	app.Post("/group/user", groupRouter.AddUserToGroup)
+	app.Delete("/group/:groupID/user/:userID", groupRouter.RemoveUserFromGroup)
 
 	port := os.Getenv("PORT")
 	if port == "" {
