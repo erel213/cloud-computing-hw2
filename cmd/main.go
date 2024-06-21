@@ -25,19 +25,23 @@ func main() {
 	//define repositories
 	userRepo := postgresRepository.NewPostgresUserRepository(db)
 	messageRepo := postgresRepository.NewPostgresMessageRepository(db)
+	groupRepo := postgresRepository.NewPostgresGroupRepostiroy(db)
 
 	//define service
 	userService := application.NewUserService(userRepo)
 	messageServicce := application.NewMessageService(messageRepo, userRepo)
+	groupService := application.NewGroupService(groupRepo, userRepo)
 
 	//define router
 	userRouter := router.NewUserRouter(userService)
 	messageRouter := router.NewMessageRouter(messageServicce)
+	groupRouter := router.NewGroupRouter(groupService)
 
 	app := fiber.New()
 
 	app.Post("/user", userRouter.CreateUser)
 	app.Post("/message", messageRouter.SendMessage)
+	app.Post("/group", groupRouter.CreateGroup)
 
 	port := os.Getenv("PORT")
 	if port == "" {
