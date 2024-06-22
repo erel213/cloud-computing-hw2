@@ -7,6 +7,7 @@ import (
 	"whatsapp-like/internal/domain/repository"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type PostgresUserRepository struct {
@@ -51,4 +52,51 @@ func (p *PostgresUserRepository) CheckIfUserExists(userId uuid.UUID) (bool, appE
 	}
 
 	return exists, nil
+}
+
+func (p *PostgresUserRepository) BlockUser(userId uuid.UUID, blockUserId uuid.UUID) appError.AppError {
+	generatedId, err := uuid.NewUUID()
+	if err != nil {
+		return appError.InternalError{Err: err}
+	}
+
+	query := `
+	INSERT INTO blocked_users (id, user_block, user_blocked)
+	VALUES ($1, $2, $3)
+	`
+
+	_, err = p.db.Exec(query, generatedId, userId, blockUserId)
+
+	if err != nil {
+		return appError.InternalError{Err: err}
+	}
+
+	return nil
+}
+
+func (p *PostgresUserRepository) GetUserById(userId uuid.UUID) (*entity.User, appError.AppError) {
+	query := `
+	select 
+		u.user_id,  array_agg(bu.user_blocked)  
+	from
+		 users u 
+	left 
+		join blocked_users bu
+	on
+		bu.user_block = u.user_id 
+	where u.user_id = $1
+	group by u.user_id 
+	`
+
+	var user entity.User
+	err := p.db.QueryRow(query, userId).Scan(&user.UserId, pq.Array(&user.BlockedUsers))
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appError.NotFoundError{Err: err}
+		}
+		return nil, appError.InternalError{Err: err}
+	}
+
+	return &user, nil
 }
