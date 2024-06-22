@@ -78,3 +78,22 @@ func (service *UserService) BlockUser(userId uuid.UUID, blockedUserId uuid.UUID)
 
 	return &respone, nil
 }
+
+func (service *UserService) GetUserById(userId uuid.UUID) (*contracts.UserResponse, appError.AppError) {
+	user, getUserErr := service.userRepo.GetUserById(userId)
+
+	if getUserErr != nil {
+		return nil, getUserErr
+	}
+
+	if user == nil {
+		return nil, appError.NotFoundError{Err: fmt.Errorf("user %s not found", userId)}
+	}
+
+	response := contracts.UserResponse{
+		UserId:       user.UserId,
+		BlockedUsers: user.BlockedUsers,
+	}
+
+	return &response, nil
+}
