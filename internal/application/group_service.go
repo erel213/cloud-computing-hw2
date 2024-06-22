@@ -2,6 +2,7 @@ package application
 
 import (
 	"errors"
+	"fmt"
 	"whatsapp-like/contracts"
 	"whatsapp-like/internal/appError"
 	"whatsapp-like/internal/domain/entity"
@@ -44,6 +45,13 @@ func (service *GroupService) CreateNewGroup(request contracts.CreateGroupRequest
 		return nil, repoErr
 	}
 
+	addUserToGroupErr := service.groupRepository.AddUserToGroup(group.CreatedBy, group.GroupId)
+	if addUserToGroupErr != nil {
+		return nil, addUserToGroupErr
+	}
+
+	//Add created user to the group
+
 	groupResponse := contracts.CreateGroupResponse{
 		GroupId:   group.GroupId,
 		GroupName: group.GroupName,
@@ -60,32 +68,26 @@ func (service *GroupService) AddUserToGroup(request contracts.AddUserToGroupRequ
 	}
 
 	if !userExists {
-		return appError.AuthenticationError{Err: errors.New("user not exists")}
+		return appError.NotFoundError{Err: fmt.Errorf("user %s not exists", request.UserId)}
 	}
 
 	//Check if group exists
-	groupExists, groupExistsErr := service.groupRepository.CheckIfGroupExists(request.GroupId)
+	group, groupExistsErr := service.groupRepository.GetGroupById(request.GroupId)
 	if groupExistsErr != nil {
 		return groupExistsErr
 	}
 
-	//Check if user already exists in group
-	userExistsInGroup, userExistsInGroupErr := service.groupRepository.CheckIfUserExistsInGroup(request.UserId, request.GroupId)
-	if userExistsInGroupErr != nil {
-		return userExistsInGroupErr
+	if group != nil {
+		return appError.NotFoundError{Err: fmt.Errorf("group %s not found", request.GroupId)}
 	}
 
-	if userExistsInGroup {
-		return appError.ValidationError{Err: errors.New("user already exists in group")}
+	//Add user to a group
+	addUserErr := group.AddUser(request.UserId)
+	if addUserErr != nil {
+		return addUserErr
 	}
 
-	if !groupExists {
-		return appError.ValidationError{Err: errors.New("group not exists")}
-	}
-
-	//Add user to group
 	repoErr := service.groupRepository.AddUserToGroup(request.UserId, request.GroupId)
-
 	if repoErr != nil {
 		return repoErr
 	}
@@ -94,29 +96,22 @@ func (service *GroupService) AddUserToGroup(request contracts.AddUserToGroupRequ
 }
 
 func (service *GroupService) RemoveUserFromGroup(request contracts.RemoveUserFromGroupRequest) appError.AppError {
-	//Check if group existw
-	groupExists, groupExistsErr := service.groupRepository.CheckIfGroupExists(request.GroupId)
-	if groupExistsErr != nil {
-		return groupExistsErr
+	group, getGroupErr := service.groupRepository.GetGroupById(request.GroupId)
+
+	if getGroupErr != nil {
+		return getGroupErr
 	}
 
-	if !groupExists {
-		return appError.ValidationError{Err: errors.New("group not exists")}
+	if group == nil {
+		return appError.NotFoundError{Err: fmt.Errorf("group %s not exists", request.GroupId)}
 	}
 
-	//Check if user exists in group
-	userExistsInGroup, userExistsInGroupErr := service.groupRepository.CheckIfUserExistsInGroup(request.UserId, request.GroupId)
-	if userExistsInGroupErr != nil {
-		return userExistsInGroupErr
+	removeUserErr := group.RemoveUser(request.UserId)
+	if removeUserErr != nil {
+		return removeUserErr
 	}
 
-	if !userExistsInGroup {
-		return appError.ValidationError{Err: errors.New("user not exists in group")}
-	}
-
-	//Remove user from group
 	repoErr := service.groupRepository.RemoveUserFromGroup(request.UserId, request.GroupId)
-
 	if repoErr != nil {
 		return repoErr
 	}

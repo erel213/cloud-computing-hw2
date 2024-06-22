@@ -29,7 +29,7 @@ func main() {
 
 	//define service
 	userService := application.NewUserService(userRepo)
-	messageServicce := application.NewMessageService(messageRepo, userRepo)
+	messageServicce := application.NewMessageService(messageRepo, userRepo, groupRepo)
 	groupService := application.NewGroupService(groupRepo, userRepo)
 
 	//define router
@@ -44,6 +44,7 @@ func main() {
 	app.Post("/group", groupRouter.CreateGroup)
 	app.Post("/group/user", groupRouter.AddUserToGroup)
 	app.Delete("/group/:groupID/user/:userID", groupRouter.RemoveUserFromGroup)
+	app.Get("/message/user/:userId", messageRouter.GetMessagesForUser)
 
 	port := os.Getenv("PORT")
 	if port == "" {

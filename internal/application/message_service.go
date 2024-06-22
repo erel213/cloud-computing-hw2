@@ -2,21 +2,26 @@ package application
 
 import (
 	"errors"
+	"fmt"
 	"whatsapp-like/contracts"
 	"whatsapp-like/internal/appError"
 	"whatsapp-like/internal/domain/entity"
 	"whatsapp-like/internal/domain/repository"
+
+	"github.com/google/uuid"
 )
 
 type MessageService struct {
 	messageRepository repository.MessageRepository
 	userRepository    repository.UserRepository
+	groupRepostitory  repository.GroupRepository
 }
 
-func NewMessageService(messageRepository repository.MessageRepository, userRepository repository.UserRepository) *MessageService {
+func NewMessageService(messageRepository repository.MessageRepository, userRepository repository.UserRepository, groupRepository repository.GroupRepository) *MessageService {
 	return &MessageService{
 		messageRepository: messageRepository,
 		userRepository:    userRepository,
+		groupRepostitory:  groupRepository,
 	}
 }
 
@@ -30,6 +35,29 @@ func (ms *MessageService) SendMessage(request contracts.SendMessageRequest) appE
 
 	if !fromUserExists {
 		return appError.ValidationError{Err: errors.New("from user does not exist")}
+	}
+
+	//Validate To prop
+	if request.ToGroup {
+		group, err := ms.groupRepostitory.GetGroupById(request.To)
+		if err != nil {
+			return err
+		}
+
+		if group == nil {
+			return appError.NotFoundError{Err: fmt.Errorf(fmt.Sprintf("group %s not found", request.To))}
+		}
+	} else {
+		//Check if to user exists
+		toUserExists, err := ms.userRepository.CheckIfUserExists(request.To)
+
+		if err != nil {
+			return err
+		}
+
+		if !toUserExists {
+			return appError.NotFoundError{Err: fmt.Errorf(fmt.Sprintf("to user %s not exists", request.To))}
+		}
 	}
 
 	//Create the message
@@ -46,4 +74,25 @@ func (ms *MessageService) SendMessage(request contracts.SendMessageRequest) appE
 	}
 
 	return nil
+}
+
+func (ms *MessageService) GetMessagesForUser(userId uuid.UUID) ([]*entity.Message, appError.AppError) {
+	// Check if user exists
+	userExists, err := ms.userRepository.CheckIfUserExists(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !userExists {
+		return nil, appError.NotFoundError{Err: errors.New("user does not exist")}
+	}
+
+	messages, err := ms.messageRepository.GetMessagesForUser(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, nil
 }
