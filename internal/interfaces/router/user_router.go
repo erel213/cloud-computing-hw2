@@ -1,6 +1,7 @@
 package router
 
 import (
+	"whatsapp-like/contracts"
 	"whatsapp-like/internal/application"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,4 +25,20 @@ func (router *UserRouter) CreateUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(user)
+}
+
+func (router *UserRouter) BlockUser(c *fiber.Ctx) error {
+	request := new(contracts.BlockUserRequest)
+	parseErr := c.BodyParser(request)
+	if parseErr != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": parseErr.Error()})
+	}
+
+	user, err := router.userService.BlockUser(request.UserId, request.BlockedUserId)
+
+	if err != nil {
+		return c.Status(err.Code()).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(user)
 }
