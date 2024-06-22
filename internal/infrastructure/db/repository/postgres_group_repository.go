@@ -7,6 +7,7 @@ import (
 	"whatsapp-like/internal/domain/repository"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type PostgresGroupRepository struct {
@@ -98,4 +99,25 @@ func (repo *PostgresGroupRepository) RemoveUserFromGroup(userId uuid.UUID, group
 	}
 
 	return nil
+}
+
+func (repo *PostgresGroupRepository) GetGroupById(groupId uuid.UUID) (*entity.Group, appError.AppError) {
+	query := `
+	SELECT groups.group_id, groups.created_by, groups.group_name, array_agg(user_group.user_id)
+	FROM groups
+	JOIN user_group ON groups.group_id = user_group.group_id
+	WHERE groups.group_id = $1
+	GROUP BY groups.group_id`
+
+	var group entity.Group
+	err := repo.DB.QueryRow(query, groupId).Scan(&group.GroupId, &group.CreatedBy, &group.GroupName, pq.Array(&group.Users))
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, appError.NotFoundError{Err: err}
+		}
+		return nil, appError.InternalError{Err: err}
+	}
+
+	return &group, nil
 }
