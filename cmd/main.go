@@ -38,13 +38,18 @@ func main() {
 	groupRouter := router.NewGroupRouter(groupService)
 
 	app := fiber.New()
-
+	//User controller
 	app.Post("/user", userRouter.CreateUser)
+	app.Post("/user/block", userRouter.BlockUser)
+
+	//Message controller
 	app.Post("/message", messageRouter.SendMessage)
+	app.Get("/message/user/:userId", messageRouter.GetMessagesForUser)
+
+	//Group controller
 	app.Post("/group", groupRouter.CreateGroup)
 	app.Post("/group/user", groupRouter.AddUserToGroup)
 	app.Delete("/group/:groupID/user/:userID", groupRouter.RemoveUserFromGroup)
-	app.Get("/message/user/:userId", messageRouter.GetMessagesForUser)
 
 	port := os.Getenv("PORT")
 	if port == "" {
