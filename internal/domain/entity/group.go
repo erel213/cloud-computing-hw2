@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"fmt"
 	"whatsapp-like/internal/appError"
 
 	"github.com/google/uuid"
@@ -11,6 +12,7 @@ type Group struct {
 	GroupId   uuid.UUID
 	CreatedBy uuid.UUID
 	GroupName string
+	Users     []uuid.UUID
 }
 
 func NewGroup(groupName string, createdBy uuid.UUID) (*Group, appError.AppError) {
@@ -28,6 +30,29 @@ func NewGroup(groupName string, createdBy uuid.UUID) (*Group, appError.AppError)
 		GroupName: groupName,
 		CreatedBy: createdBy,
 	}, nil
+}
+
+func (g *Group) AddUser(userId uuid.UUID) appError.AppError {
+	//Check if user in group
+	for _, user := range g.Users {
+		if user == userId {
+			return appError.ValidationError{Err: fmt.Errorf("user %s exists in group %s", userId, g.GroupId)}
+		}
+	}
+
+	g.Users = append(g.Users, userId)
+	return nil
+}
+
+func (g *Group) RemoveUser(userId uuid.UUID) appError.AppError {
+	for i, user := range g.Users {
+		if user == userId {
+			g.Users = append(g.Users[:i], g.Users[i+1:]...)
+			return nil
+		}
+	}
+
+	return appError.NotFoundError{Err: fmt.Errorf("user %s not exist in group %s", userId, g.GroupId)}
 }
 
 func validateNewGroup(groupName string) appError.AppError {
