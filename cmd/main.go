@@ -41,6 +41,7 @@ func main() {
 	//User controller
 	app.Post("/user", userRouter.CreateUser)
 	app.Post("/user/block", userRouter.BlockUser)
+	app.Get("/user/:userId", userRouter.GetUserById)
 
 	//Message controller
 	app.Post("/message", messageRouter.SendMessage)

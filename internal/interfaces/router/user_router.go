@@ -5,6 +5,7 @@ import (
 	"whatsapp-like/internal/application"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type UserRouter struct {
@@ -41,4 +42,20 @@ func (router *UserRouter) BlockUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(user)
+}
+
+func (router *UserRouter) GetUserById(c *fiber.Ctx) error {
+	userId := c.Params("userId")
+	userIdParsed, parseErr := uuid.Parse(userId)
+
+	if parseErr != nil {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"errors": parseErr})
+	}
+
+	response, responseErr := router.userService.GetUserById(userIdParsed)
+	if responseErr != nil {
+		return c.Status(responseErr.Code()).JSON(fiber.Map{"errors": responseErr})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
