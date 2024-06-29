@@ -13,8 +13,8 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Build the Go app
-RUN go build -o whatsapp-like ./cmd/main.go
+# Build the Go binary for linux/amd64 architecture
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o whatsapp-like
 
 ######## Start a new stage from scratch #######
 FROM alpine:latest

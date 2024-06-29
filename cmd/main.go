@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	log.Printf("Starting server...")
 	db_connection_string := os.Getenv("DATASOURCE_URL")
 	db, err := sql.Open("postgres", db_connection_string)
 	if err != nil {

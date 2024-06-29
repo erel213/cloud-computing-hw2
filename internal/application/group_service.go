@@ -77,7 +77,7 @@ func (service *GroupService) AddUserToGroup(request contracts.AddUserToGroupRequ
 		return groupExistsErr
 	}
 
-	if group != nil {
+	if group == nil {
 		return appError.NotFoundError{Err: fmt.Errorf("group %s not found", request.GroupId)}
 	}
 

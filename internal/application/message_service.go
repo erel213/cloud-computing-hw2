@@ -76,23 +76,28 @@ func (ms *MessageService) SendMessage(request contracts.SendMessageRequest) appE
 	return nil
 }
 
-func (ms *MessageService) GetMessagesForUser(userId uuid.UUID) ([]*entity.Message, appError.AppError) {
+func (ms *MessageService) GetMessagesForUser(userId uuid.UUID) (*[]entity.Message, appError.AppError) {
 	// Check if user exists
-	userExists, err := ms.userRepository.CheckIfUserExists(userId)
+	user, err := ms.userRepository.GetUserById(userId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if !userExists {
+	if user == nil {
 		return nil, appError.NotFoundError{Err: errors.New("user does not exist")}
 	}
 
-	messages, err := ms.messageRepository.GetMessagesForUser(userId)
+	messages, messageRepoErr := ms.messageRepository.GetMessagesForUser(userId)
 
-	if err != nil {
-		return nil, err
+	if messageRepoErr != nil {
+		return nil, messageRepoErr
 	}
 
-	return messages, nil
+	filteredMessages, filterMessageErr := user.FilterBlockedMessages(messages)
+	if filterMessageErr != nil {
+		return nil, filterMessageErr
+	}
+
+	return filteredMessages, nil
 }
