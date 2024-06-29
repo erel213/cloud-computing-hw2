@@ -12,14 +12,14 @@ resource "aws_lb" "main" {
 
 resource "aws_lb_target_group" "app" {
   name        = "app-tg"
-  port        = 80
+  port        = 8080
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
 
   health_check {
     interval            = 30
-    path                = "/"
+    path                = "/health"
     protocol            = "HTTP"
     timeout             = 5
     healthy_threshold   = 5

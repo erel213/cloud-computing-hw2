@@ -55,6 +55,16 @@ func (g *Group) RemoveUser(userId uuid.UUID) appError.AppError {
 	return appError.NotFoundError{Err: fmt.Errorf("user %s not exist in group %s", userId, g.GroupId)}
 }
 
+func (g *Group) IsUserInGroup(userId uuid.UUID) (bool, appError.AppError) {
+	for _, user := range g.Users {
+		if user == userId {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func validateNewGroup(groupName string) appError.AppError {
 	if groupName == "" {
 		return appError.ValidationError{Err: errors.New("group name cannot be null")}

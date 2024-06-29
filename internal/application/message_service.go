@@ -39,14 +39,25 @@ func (ms *MessageService) SendMessage(request contracts.SendMessageRequest) appE
 
 	//Validate To prop
 	if request.ToGroup {
-		group, err := ms.groupRepostitory.GetGroupById(request.To)
-		if err != nil {
-			return err
+		group, userInGroupErr := ms.groupRepostitory.GetGroupById(request.To)
+		if userInGroupErr != nil {
+			return userInGroupErr
 		}
 
 		if group == nil {
 			return appError.NotFoundError{Err: fmt.Errorf(fmt.Sprintf("group %s not found", request.To))}
 		}
+
+		//Check if from user is in group
+		isUserInGroup, userInGroupErr := group.IsUserInGroup(request.FromUser)
+		if userInGroupErr != nil {
+			return userInGroupErr
+		}
+
+		if !isUserInGroup {
+			return appError.ValidationError{Err: fmt.Errorf(fmt.Sprintf("user %s not in group %s", request.FromUser, request.To))}
+		}
+
 	} else {
 		//Check if to user exists
 		toUserExists, err := ms.userRepository.CheckIfUserExists(request.To)
