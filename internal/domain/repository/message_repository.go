@@ -9,5 +9,5 @@ import (
 
 type MessageRepository interface {
 	CreateMessage(message *entity.Message) appError.AppError
-	GetMessagesForUser(userId uuid.UUID) ([]*entity.Message, appError.AppError)
+	GetMessagesForUser(userId uuid.UUID) (*[]entity.Message, appError.AppError)
 }
