@@ -10,6 +10,7 @@ import (
 	"whatsapp-like/internal/interfaces/router"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	_ "github.com/lib/pq"
 )
 
@@ -22,7 +23,7 @@ func main() {
 	}
 
 	defer db.Close()
-
+	log.Printf("Database connected")
 	//define repositories
 	userRepo := postgresRepository.NewPostgresUserRepository(db)
 	messageRepo := postgresRepository.NewPostgresMessageRepository(db)
@@ -39,7 +40,12 @@ func main() {
 	groupRouter := router.NewGroupRouter(groupService)
 
 	app := fiber.New()
+	app.Use(logger.New())
 	//User controller
+	//set up route for health check
+	app.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
+	})
 	app.Post("/user", userRouter.CreateUser)
 	app.Post("/user/block", userRouter.BlockUser)
 	app.Get("/user/:userId", userRouter.GetUserById)
