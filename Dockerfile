@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary for linux/amd64 architecture
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o whatsapp-like
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o whatsapp-like ./cmd/main.go
 
 ######## Start a new stage from scratch #######
 FROM alpine:latest
