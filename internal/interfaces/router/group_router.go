@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log/slog"
 	"whatsapp-like/contracts"
 	"whatsapp-like/internal/application"
 
@@ -23,26 +24,30 @@ func (router *GroupRouter) CreateGroup(c *fiber.Ctx) error {
 	if err := c.BodyParser(groupContract); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	groupResponse, err := router.GroupService.CreateNewGroup(*groupContract)
 	if err != nil {
+		slog.Error("Error creating group: %v", err)
 		return c.Status(err.Code()).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	slog.Info("Group created:", "groupId", groupResponse.GroupId)
 	return c.Status(fiber.StatusCreated).JSON(groupResponse)
 }
 
 func (router *GroupRouter) AddUserToGroup(c *fiber.Ctx) error {
 	addUserToGroupContract := new(contracts.AddUserToGroupRequest)
 	if err := c.BodyParser(addUserToGroupContract); err != nil {
+		slog.Error("Error parsing request: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	err := router.GroupService.AddUserToGroup(*addUserToGroupContract)
 	if err != nil {
+		slog.Error("Error adding user to group: %v", err)
 		return c.Status(err.Code()).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	slog.Info("User added to group:", "userId", addUserToGroupContract.UserId, "groupId", addUserToGroupContract.GroupId)
 	c.Status(fiber.StatusCreated)
 	return nil
 }
@@ -57,9 +62,11 @@ func (router *GroupRouter) RemoveUserFromGroup(c *fiber.Ctx) error {
 
 	err := router.GroupService.RemoveUserFromGroup(*removeUserFromGroupContract)
 	if err != nil {
+		slog.Error("Error removing user from group: %v", err)
 		return c.Status(err.Code()).JSON(fiber.Map{"error": err.Error()})
 	}
 
+	slog.Info("User removed from group:", "userId", userId, "groupId", groupId)
 	c.Status(fiber.StatusOK)
 	return nil
 }
