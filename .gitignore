@@ -1,4 +1,11 @@
 **/documentation
 **/.vscode
 **/docker-compose.yml
+**/.terraform
+*.pem
+*.tfstate
+*.tfstate.backup
+*tfplan
+*.hcl
+
 
